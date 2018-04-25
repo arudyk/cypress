@@ -62,14 +62,17 @@ module Validators
       record = parse_and_save_record(doc, te, options)
       return false unless record
       # This Logic will need to be updated with CQL calculations
-      @measures.each do |measure|
-        result = Cypress::JsEcqmCalc.new([record.id.to_s],[measure.id.to_s],{ 'correlation_id': options.test_execution.id.to_s } )
-        original_results = QDM::IndividualResult.where('patient_id' => mrn, 'measure_id' => measure.id)
-        new_results = []
-        new_results = QDM::IndividualResult.where('patient_id' => record.id, 'measure_id' => measure.id, 'extendedData.correlation_id' => options.test_execution.id.to_s)
-        options[:population_ids] = measure.population_ids
-        passed = compare_results(original_results.first, new_results.first, options, passed)
-      end
+      # @measures.each do |measure|
+      #   ex_opts = { 'test_id' => te.id, 'bundle_id' => @bundle.id,  'effective_date' => te.task.effective_date,
+      #               'enable_logging' => true, 'enable_rationale' => true, 'oid_dictionary' => generate_oid_dictionary(measure, @bundle.id) }
+      #   @mre = QME::MapReduce::Executor.new(measure.hqmf_id, measure.sub_id, ex_opts)
+        @calc = Cypress::JsEcqmCalc.new(record.id, [measure.id] {})
+      #   results = @mre.get_patient_result(record.medical_record_number)
+      #   original_results = QME::PatientCache.where('value.medical_record_id' => mrn, 'value.test_id' => @test_id,
+      #                                              'value.measure_id' => measure.hqmf_id, 'value.sub_id' => measure.sub_id).first
+      #   options[:population_ids] = measure.population_ids
+      #   passed = compare_results(original_results, results, options, passed)
+      # end
       record.destroy
       passed
     end
