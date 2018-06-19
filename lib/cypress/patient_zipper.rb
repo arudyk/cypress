@@ -37,6 +37,7 @@ module Cypress
     end
 
     def export(patient)
+      Patient.scoop_and_filter
       cms_compatibility = patient.product_test&.product&.c3_test
       options = { provider: patient.provider, submission_program: cms_compatibility, start_time: start_time, end_time: end_time }
       case patient.bundle.qrda_version
