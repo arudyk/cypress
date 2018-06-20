@@ -136,41 +136,6 @@ module QDM
       # TODO: R2P: demographics from patient model
       [patient, changed, self]
     end
-
-    def self.scoop_and_filter(patient, measure)
-      valuesets = [];
-      codes = [];
-      dataElements = [];
-      hqmfOid = [];
-
-      measure.hqmf_document.source_data_criteria.each do |criteria|
-        hqmf_oid = HQMF::DataCriteria.template_id_for_definition(criteria.definion, criteria.status, criteria.negation)
-
-      patient.dataElement.each do |hqfm|
-        if hqfm.where(hqfmOid: hqmf_oid).nil?
-          patient.delete(dataElement)
-        else
-        hqmfOid << hqfm.where(hqfmOid: hqmf_oid)
-      end
-
-      patient.dataElement.dataElementCodes.each do |code|
-        if code.nil?
-          patient.delete(dataElement)
-        else
-        codes << code
-      end
-     
-      measure.value_set_oid_version_objects.each do |valueset|
-        valuesets << HealthDataStandards::SVS::ValueSet.where(oid: valueset.oid, version: valueset.version)
-
-      if codes.where(code: valueset.code, codeSystem: valuesets.code_system_name).nil?
-        patient.delete(dataElement)
-      else
-      dataElements << codes.where(code: valueset.code, codeSystem: valuesets.code_system_name)
-      end
-    patient
-  end
-
     #
     # HDS helpers
     #
