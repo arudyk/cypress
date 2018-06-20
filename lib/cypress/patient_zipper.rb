@@ -37,7 +37,6 @@ module Cypress
     end
 
     def export(patient)
-      Patient.scoop_and_filter
       cms_compatibility = patient.product_test&.product&.c3_test
       options = { provider: patient.provider, submission_program: cms_compatibility, start_time: start_time, end_time: end_time }
       case patient.bundle.qrda_version
@@ -55,6 +54,7 @@ module Cypress
     def self.zip(file, patients, format)
       patients = apply_sort_to patients
       measures, sd, ed = measure_start_end(patients)
+      Cypress::ScoopAndFilter.initialize(patients)
 
       # TODO: R2P: make sure patient exporter works (use correct one)
       formatter = if format.to_sym == :qrda
