@@ -54,7 +54,7 @@ module Cypress
     def self.zip(file, patients, format)
       patients = apply_sort_to patients
       measures, sd, ed = measure_start_end(patients)
-      Cypress::ScoopAndFilter.initialize(patients)
+      Cypress::ScoopAndFilter.initialize(measures)
 
       # TODO: R2P: make sure patient exporter works (use correct one)
       formatter = if format.to_sym == :qrda
@@ -65,6 +65,7 @@ module Cypress
 
       Zip::ZipOutputStream.open(file.path) do |z|
         patients.each_with_index do |patient, i|
+          Cypress::ScoopAndFilter.scoop_and_filter(patient)
           z.put_next_entry("#{next_entry_path(patient, i)}.#{FORMAT_EXTENSIONS[format.to_sym]}")
           # TODO: R2P: make sure using correct exporter
           z << if formatter == HealthDataStandards::Export::HTML

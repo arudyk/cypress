@@ -29,7 +29,7 @@ class ScoopAndFilter
         code_list.map { |cl| { code: cl.code, codeSystem: cl.code_system_name } }
     end
 
-    def scoop_and_filter (patients)
+    def scoop_and_filter (patient)
         demographic_oids = ['2.16.840.1.113883.10.20.28.3.55', '2.16.840.1.113883.10.20.28.3.59', '2.16.840.1.113883.10.20.28.3.56']
 
         demographic_criteria = patient.dataElements.where(:hqmfOid => { '$in' => demographic_oids })
