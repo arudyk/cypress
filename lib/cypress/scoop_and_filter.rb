@@ -1,15 +1,15 @@
 
-
+module Cypress
 class ScoopAndFilter
-    def initialize (measures)
+    def initialize(measures)
         @relevant_codes = codes_in_measures(measures)
         @hqmf_oids_for_measures = []
         measures.each do |measure|
             measure.source_data_criteria.each do |key, criteria|
-              hqmf_oids_for_measures << HQMF::DataCriteria.template_id_for_definition(criteria['definition'], criteria['status'], criteria['negation'])
+              @hqmf_oids_for_measures << HQMF::DataCriteria.template_id_for_definition(criteria['definition'], criteria['status'], criteria['negation'])
             end
         end
-        hqmf_oids_for_measures.uniq!
+        @hqmf_oids_for_measures.uniq!
 
 
     end
@@ -29,16 +29,16 @@ class ScoopAndFilter
         code_list.map { |cl| { code: cl.code, codeSystem: cl.code_system_name } }
     end
 
-    def scoop_and_filter (patient)
+    def scoop_and_filter(patient)
         demographic_oids = ['2.16.840.1.113883.10.20.28.3.55', '2.16.840.1.113883.10.20.28.3.59', '2.16.840.1.113883.10.20.28.3.56']
 
         demographic_criteria = patient.dataElements.where(:hqmfOid => { '$in' => demographic_oids })
 
-        patient.dataElements.keep_if { |data_element| hqmf_oids_for_measures.include? data_element.hqmfOid }
+        patient.dataElements.keep_if { |data_element| @hqmf_oids_for_measures.include? data_element.hqmfOid }
 
         patient.dataElements.each do |data_element|
             # keep if data_element code and codesystem is in one of the relevant_codes
-            data_element.dataElementCodes.keep_if { |data_element_code| relevant_codes.include?(:code=>data_element_code.code, :codeSystem=>data_element_code.codeSystem) }
+            data_element.dataElementCodes.keep_if { |data_element_code| @relevant_codes.include?(:code=>data_element_code.code, :codeSystem=>data_element_code.codeSystem) }
         end
         
         # keep data element if codes is not empty
@@ -49,4 +49,5 @@ class ScoopAndFilter
         patient
     end
 
+end
 end
