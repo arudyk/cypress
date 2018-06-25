@@ -41,6 +41,7 @@ module Cypress
       options = { provider: patient.provider, submission_program: cms_compatibility, start_time: start_time, end_time: end_time }
       case patient.bundle.qrda_version
       when 'r5'
+        byebug
         Qrda1R5.new(patient, measures, options).render
       end
     end
@@ -65,7 +66,8 @@ module Cypress
 
       Zip::ZipOutputStream.open(file.path) do |z|
         patients.each_with_index do |patient, i|
-          #my_scoop_and_filter.scoop_and_filter(patient)
+        my_scoop_and_filter.scoop_and_filter(patient)
+        byebug
           z.put_next_entry("#{next_entry_path(patient, i)}.#{FORMAT_EXTENSIONS[format.to_sym]}")
           # TODO: R2P: make sure using correct exporter
           z << if formatter == HealthDataStandards::Export::HTML
