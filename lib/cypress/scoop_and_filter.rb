@@ -3,10 +3,9 @@ module Cypress
 class ScoopAndFilter
     def initialize(measures)
         @relevant_codes = codes_in_measures(measures)
+        @demographic_oids = ['2.16.840.1.113883.10.20.28.3.55', '2.16.840.1.113883.10.20.28.3.59', '2.16.840.1.113883.10.20.28.3.56']
         @hqmf_oids_for_measures = []
-        @hqmf_oids_for_measures = get_all_hqmf_oids_definition_and_status(measures)
-
-
+        @hqmf_oids_for_measures = get_all_hqmf_oids_definition_and_status(measures) - @demographic_oids
     end
 
     # return an array of all of the concepts in all of the valueset for the measure
@@ -43,21 +42,15 @@ class ScoopAndFilter
     end
 
     def scoop_and_filter(patient)
-        demographic_oids = ['2.16.840.1.113883.10.20.28.3.55', '2.16.840.1.113883.10.20.28.3.59', '2.16.840.1.113883.10.20.28.3.56']
-
-        demographic_criteria = patient.dataElements.where(:hqmfOid => { '$in' => demographic_oids })
+        demographic_criteria = patient.dataElements.where(:hqmfOid => { '$in' => @demographic_oids }).clone
         patient.dataElements.keep_if { |data_element| @hqmf_oids_for_measures.include? data_element.hqmfOid }
-
         patient.dataElements.each do |data_element|
             # keep if data_element code and codesystem is in one of the relevant_codes
             data_element.dataElementCodes.keep_if { |data_element_code| @relevant_codes.include?(:code=>data_element_code.code, :codeSystem=>data_element_code.codeSystem) }
         end
-        
         # keep data element if codes is not empty
         patient.dataElements.keep_if { |data_element| !data_element.dataElementCodes.blank? }
-
         patient.dataElements.concat(demographic_criteria)
-
         patient
     end
 
